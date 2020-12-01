@@ -11,8 +11,9 @@
 (defn day01 [filename solution]
   (println filename solution)
   (let [contents (slurp filename)
-        input (str/split-lines contents)]
-    (println "combination found" (first (find-combination 2020 input (keyword (str solution)))))))
+        input (str/split-lines contents)
+        comb (first (find-combination 2020 input (keyword (str solution))))]
+    (println "combination found" comb "with a product of" (apply * (map #(Integer/parseInt %) comb)))))
 
 (defn -main
   "I don't do a whole lot ... yet."
