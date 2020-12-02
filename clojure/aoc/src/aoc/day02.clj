@@ -1,11 +1,5 @@
-(ns aoc.core
-  (:gen-class)
-  (:require [clojure.string :as str]
-            [aoc.day01 :as day01]
-            [aoc.day02 :as day02]))
-
-(defn- get-input [filename]
-  (str/split-lines (slurp filename)))
+(ns aoc.day02
+  (:require [clojure.string :as str]))
 
 (defn- parse-each-record [record]
   (let [[range char password] (str/split record #" ")
@@ -28,21 +22,11 @@
         second-pos-present (= char second-char)]
     (if (not present-at-both-places) (or first-pos-present second-pos-present))))
 
-(defn day02 [filename solution]
-  (println filename solution)
-  (let [input (get-input filename)
-        count (day02/find-valid-passwords input solution)]
-    (println "total valid passwords found: " count)))
-
-(defn day01 [filename solution]
-  (println filename solution)
-  (let [input (get-input filename)
-        comb (first (day01/find-combination 2020 input (keyword (str solution))))]
-    (println "combination found" comb "with a product of" (apply * (map #(Integer/parseInt %) comb)))))
-
-(defn -main
-  "I don't do a whole lot ... yet."
-  [_ day & args]
-  (println "Hello, World!" day args)
-  (when-let [fun (ns-resolve *ns* (symbol "aoc.core" day))]
-    (apply fun (str "resources/" day ".txt") (first args))))
+(defn find-valid-passwords [input rule-type]
+  (let [records (map parse-each-record input)
+        solution-type (keyword (str rule-type))
+        valid-fn (cond (= :a solution-type) is-valid-password?
+                       (= :b solution-type) is-valid-password-b?
+                       :else is-valid-password?)
+        output (map valid-fn  records)]
+    (count (filter true? output))))
