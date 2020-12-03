@@ -25,7 +25,7 @@
   (let [input (get-input filename)
         counts (day03/begin input solution)]
     (println "total trees found: " counts)
-    (println "total trees mutliplied: " (apply * counts))))
+    (println "total trees multiplied: " (apply * counts))))
 
 (defn -main
   "I don't do a whole lot ... yet."
