@@ -1,9 +1,8 @@
-(ns aoc.day04
+(ns core
   (:require [clojure.string :as str]
             [clojure.spec.alpha :as s]))
 
 (defn- get-passport [record]
-  (println record)
   (let [temp (vec (map #(str/split % #":") record))]
     (into {} (for [[k v] temp]
                [(keyword k) v]))))
@@ -29,7 +28,11 @@
 (s/def ::passport (s/keys :req-un [::byr ::iyr ::eyr ::hgt ::hcl ::ecl ::pid]
                           :opt-un [::cid]))
 
-(defn begin [rows solution]
-  (let [records (map #(str/split % #"(\n| )") rows)]
-    (count (filter #(do (println (s/explain ::passport %))
-                        (s/valid? ::passport %)) (map get-passport records)))))
+(defn begin [rows]
+  (let [records (map #(str/split % #"(\n| )") rows)
+        count (count (filter #(s/valid? ::passport %) (map get-passport records)))]
+    (println "number of valid passwords: " count)))
+
+(defn -main [& args]
+  (println "hello")
+  (begin (str/split (slurp "input") #"\n\n")))

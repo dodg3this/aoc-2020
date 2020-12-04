@@ -4,10 +4,14 @@
             [aoc.day01 :as day01]
             [aoc.day02 :as day02]
             [aoc.day03 :as day03]
-            [aoc.day04 :as day04]))
+            [aoc.day04 :as day04])
+  (:import (java.util.regex Pattern)))
 
-(defn- get-input [filename]
-  (str/split-lines (slurp filename)))
+(defn- get-input
+  ([filename]
+   (str/split filename #"\n"))
+  ([filename ^Pattern re]
+   (str/split (slurp filename) re)))
 
 (defn day02 [filename solution]
   (println filename solution)
@@ -30,7 +34,7 @@
 
 (defn day04 [filename solution]
   (println filename solution)
-  (let [input (get-input filename)
+  (let [input (get-input filename #"\n\n")
         count (day04/begin input solution)]
     (println "valid passports:" count)))
 
