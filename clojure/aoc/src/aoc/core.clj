@@ -3,7 +3,8 @@
   (:require [clojure.string :as str]
             [aoc.day01 :as day01]
             [aoc.day02 :as day02]
-            [aoc.day03 :as day03]))
+            [aoc.day03 :as day03]
+            [aoc.day04 :as day04]))
 
 (defn- get-input [filename]
   (str/split-lines (slurp filename)))
@@ -26,6 +27,12 @@
         counts (day03/begin input solution)]
     (println "total trees found: " counts)
     (println "total trees multiplied: " (apply * counts))))
+
+(defn day04 [filename solution]
+  (println filename solution)
+  (let [input (get-input filename)
+        count (day04/begin input solution)]
+    (println "valid passports:" count)))
 
 (defn -main
   "I don't do a whole lot ... yet."
