@@ -1,16 +1,10 @@
 (ns core
   (:require [clojure.string :as str]))
 
-(defn- reduce-to [s max]
-  (first (reduce #(let [val (if %2 [(+ 1 (quot (apply + %1) 2)) (second %1)] [(first %1) (quot (apply + %1) 2)])]
-                    val) [0 max] s)))
-
 (defn- get-id [barcode]
-  (let [ys (for [y barcode :while (contains? #{\B, \F} y)] (= y \B))
-        xs (for [x barcode :when (contains? #{\R, \L} x)] (= x \R))
-        y (reduce-to ys 127)
-        x (reduce-to xs 7)]
-    (+ (* y 8) x)))
+  (println )
+  (let [binary (str/replace (str/replace (str/replace (str/replace barcode #"F" "0") #"L" "0") #"B" "1") #"R" "1")]
+    (Integer/parseInt binary 2)))
 
 (defn begin [barcodes]
   (let [ids (sort (map get-id barcodes))
