@@ -6,7 +6,6 @@
 (def acc (atom 0))
 (def swapped-instruction (atom {}))
 (def swapped (atom false))
-(def counter (atom 0))
 
 (def replace-instruction-map {"nop" "jmp", "jmp" "nop"})
 
@@ -43,7 +42,7 @@
 
 (defn -main [& args]
   (println "hello")
-  (beginA (str/split (slurp "input") #"\n"))
+  (beginB (str/split (slurp "input") #"\n"))
   (println @idx)
   (println @visited)
   (println @acc))
