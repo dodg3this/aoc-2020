@@ -2,45 +2,59 @@
   (:require [clojure.string :as str]
             [clojure.set :refer :all]))
 
+(def address-length 36)
+
+(defn apply-bit-mask [mask val]
+  (loop [m mask i 0 v (Integer/parseInt val)]
+    (if (empty? m) v
+                   (recur (next m) (inc i) (case (first m)
+                                             \0 (bit-clear v (- address-length 1 i))
+                                             \1 (bit-set v (- address-length 1 i))
+                                             v)))))
+
+
+(defn apply-bit-mask-b [mask val]
+  (loop [m mask i 0 v (Integer/parseInt val)]
+    (if (empty? m) v
+                   (recur (next m) (inc i) (if (= \1 (first m)) (bit-set v (- address-length 1 i)) v)))))
+
 (defn begin [input]
   (let [program (map (fn [line]
                        (let [[_ instruction idx val] (first (re-seq #"(mem|mask)\[?(\d*)\]? = (\w*)" line))]
                          {:instruction instruction :idx idx :val val})) input)]
-    (println "*****" (apply + (vals (loop [prog program
-                                           mask "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                                           memory {}]
-                                      (if (empty? prog)
-                                        memory
-                                        (let [{:keys [instruction idx val]} (first prog)]
-                                          (case instruction
-                                            "mask" (recur (next prog) val memory)
-                                            "mem" (let [idx (Integer/parseInt idx)
-                                                        new-val (atom (Integer/parseInt val))
-                                                        masks (for [i (range (.length mask))] (case (nth mask i)
-                                                                                                \0 (swap! new-val bit-clear (- 35 i))
-                                                                                                \1 (swap! new-val bit-set (- 35 i))
-                                                                                                @new-val))]
-                                                    (recur (next prog) mask (assoc memory idx (last masks)))))))))))))
+
+
+    (println "sum of all values in memory is" (apply + (vals (loop [prog program
+                                                                    mask "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                                                                    memory {}]
+                                                               (if (empty? prog)
+                                                                 memory
+                                                                 (let [{:keys [instruction idx val]} (first prog)]
+                                                                   (case instruction
+                                                                     "mask" (recur (next prog) val memory)
+                                                                     "mem" (recur (next prog) mask (assoc memory idx (apply-bit-mask mask val))))))))))))
 
 (defn beginB [input]
   (let [program (map (fn [line]
                        (let [[_ instruction idx val] (first (re-seq #"(mem|mask)\[?(\d*)\]? = (\w*)" line))]
                          {:instruction instruction :idx idx :val val})) input)]
-    (println "*****" (apply + (vals (loop [prog program
-                                           mask "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                                           memory {}]
-                                      (if (empty? prog)
-                                        memory
-                                        (let [{:keys [instruction idx val]} (first prog)]
-                                          (case instruction
-                                            "mask" (recur (next prog) val memory)
-                                            "mem" (let [idx (atom (Integer/parseInt idx))
-                                                        new-val (Integer/parseInt val)
-                                                        masked (last (for [i (range (.length mask)) :let [msk (nth mask i)] :when (not= \X msk)] (if (= \1 msk) (swap! idx bit-set (- 35 i)) @idx)))
-                                                        mems (atom #{masked})
-                                                        floatings (for [i (range (.length mask)) :let [msk (nth mask i)] :when (= \X msk)] (swap! mems union (apply union (for [m @mems] (conj #{} (bit-set m (- 35 i))
-                                                                                                                                                                                               (bit-clear m (- 35 i)))))))]
-                                                    (recur (next prog) mask (reduce #(assoc %1 %2 new-val) memory (last floatings)))))))))))))
+    (println "sum of all values in memory is" (apply + (vals (loop [prog program
+                                                                    mask "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                                                                    memory {}]
+                                                               (if (empty? prog)
+                                                                 memory
+                                                                 (let [{:keys [instruction idx val]} (first prog)]
+                                                                   (case instruction
+                                                                     "mask" (recur (next prog) val memory)
+
+                                                                     "mem" (let [masked-idx (apply-bit-mask-b mask idx)
+                                                                                 new-val (Integer/parseInt val)
+                                                                                 floaters (loop [m mask i 0 mems #{masked-idx}]
+                                                                                            (if (empty? m) mems
+                                                                                                           (if (= \X (first m))
+                                                                                                             (recur (next m) (inc i) (union mems (map #(bit-flip % (- address-length 1 i)) mems)))
+                                                                                                             (recur (next m) (inc i) mems))))]
+                                                                             (recur (next prog) mask (reduce #(assoc %1 %2 new-val) memory floaters))))))))))))
 
 
 (defn -main [& args]
