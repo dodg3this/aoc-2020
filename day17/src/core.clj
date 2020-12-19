@@ -37,6 +37,7 @@
                             parse
                             (iterate cycle)) 6))))
 
+(hash-set)
 (defn -main [& args]
   (println "hello" args)
   (time (begin (str/split (slurp (or (first args) "sample")) #"\n"))))
