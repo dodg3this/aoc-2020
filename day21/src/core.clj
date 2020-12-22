@@ -16,8 +16,8 @@
 
 (defn begin [input]
   (let [foods (map parse input)
-        all-allergens (apply union (for [[is as] foods] as))
-        all-ingredients (apply union (for [[is as] foods] is))
+        all-allergens (apply union (for [[_ allergens] foods] allergens))
+        all-ingredients (apply union (for [[ingredients _] foods] ingredients))
         ingredients-allergens-map (loop [allergens all-allergens m {}]
                                     (if (empty? allergens) m
                                                            (let [allergen (first allergens)
